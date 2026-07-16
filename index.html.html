@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AetherLogic — Causal Reasoning &amp; Predictive AI</title>
+<meta name="description" content="AetherLogic pairs causal reasoning with production-grade forecasting. Explainable predictions, not black boxes." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='40' fill='%230A0A0C'/%3E%3Cg stroke='%234361EE' stroke-width='10' stroke-linecap='round'%3E%3Cline x1='100' y1='34' x2='30' y2='166'/%3E%3Cline x1='100' y1='34' x2='170' y2='166'/%3E%3C/g%3E%3Ccircle cx='124' cy='10' r='9' fill='%23FFB020'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<style>
+  :root{
+    --void:#0A0A0C;
+    --surface:#131316;
+    --surface-2:#1B1B20;
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(67,97,238,0.45);
+    --blue:#4361EE;
+    --blue-soft:#8093FF;
+    --amber:#FFB020;
+    --up:#3DDC84;
+    --down:#FF6B6B;
+    --paper:#F5F5F2;
+    --mist:#9C9CA6;
+    --mist-dim:#5A5A62;
+    --radius:18px;
+    --display:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--body);
+    background:var(--void);
+    color:var(--paper);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+  img,svg{display:block;max-width:100%;}
+  button{font:inherit;}
+  .container{max-width:1200px;margin:0 auto;padding:0 24px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);}
+  h1,h2,h3,h4{font-family:var(--display);font-weight:600;color:var(--paper);letter-spacing:-0.01em;}
+  .section-title{font-size:clamp(1.9rem,3vw,2.6rem);margin:14px 0 16px;}
+  .section-sub{color:var(--mist);max-width:620px;font-size:1.05rem;margin-bottom:48px;}
+  .center{text-align:center;margin-left:auto;margin-right:auto;}
+  section{padding:110px 0;position:relative;}
+  .grad-text{background:linear-gradient(120deg,var(--blue-soft),var(--amber));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--body);font-weight:600;font-size:0.98rem;
+    padding:14px 28px;border-radius:10px;cursor:pointer;border:1px solid transparent;
+    transition:all .25s ease;
+  }
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(67,97,238,0.4);background:#5471FF;}
+  .btn-ghost{border-color:var(--border);color:var(--paper);background:rgba(255,255,255,0.03);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.07);border-color:var(--mist-dim);}
+  .btn-amber{background:var(--amber);color:#231400;}
+  .btn-amber:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(255,176,32,0.3);}
+  .btn-row{display:flex;gap:16px;flex-wrap:wrap;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky;top:0;z-index:200;
+    background:rgba(10,10,12,0.78);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;}
+  .brand-word{font-family:var(--display);font-size:1.28rem;font-weight:600;}
+  .brand-word .lg{color:var(--blue-soft);}
+  .nav-links{display:flex;align-items:center;gap:30px;font-size:0.92rem;font-weight:500;color:var(--mist);}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-cta{display:flex;align-items:center;gap:18px;}
+  .hamburger{display:none;font-size:1.5rem;cursor:pointer;color:var(--paper);}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:100px 0 60px;overflow:hidden;}
+  .glow-orb{position:absolute;border-radius:50%;filter:blur(80px);z-index:0;pointer-events:none;}
+  .glow-1{width:480px;height:480px;background:radial-gradient(circle,rgba(67,97,238,0.28),transparent 70%);top:-160px;right:-120px;}
+  .glow-2{width:380px;height:380px;background:radial-gradient(circle,rgba(255,176,32,0.12),transparent 70%);bottom:-140px;left:-100px;}
+  .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:center;}
+  .hero-content h1{font-size:clamp(2.4rem,4.4vw,3.6rem);line-height:1.12;margin-bottom:22px;}
+  .hero-content p{font-size:1.15rem;color:var(--mist);max-width:520px;margin-bottom:34px;}
+  .hero-content .eyebrow{margin-bottom:18px;}
+  .hero-proof{display:flex;gap:26px;margin-top:36px;flex-wrap:wrap;}
+  .hero-proof div{font-family:var(--mono);}
+  .hero-proof b{display:block;font-size:1.3rem;color:var(--paper);}
+  .hero-proof span{font-size:0.72rem;color:var(--mist-dim);letter-spacing:0.05em;text-transform:uppercase;}
+
+  .readout{
+    background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+  }
+  .readout-bar{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);}
+  .readout-bar span{width:9px;height:9px;border-radius:50%;background:#33333a;}
+  .readout-bar .rlabel{margin-left:auto;font-family:var(--mono);font-size:0.72rem;color:var(--mist-dim);letter-spacing:0.08em;}
+  .readout-chart{padding:18px 22px 6px;}
+  .readout-body{padding:6px 22px 22px;font-family:var(--mono);font-size:0.84rem;}
+  .rrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed var(--border);}
+  .rrow:last-child{border-bottom:none;}
+  .rname{color:var(--mist);}
+  .rval{display:flex;align-items:center;gap:10px;}
+  .conf{color:var(--paper);}
+  .up{color:var(--up);}
+  .down{color:var(--down);}
+  .pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulse 1.8s infinite ease-in-out;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+
+  /* ---------- TRUST / INDUSTRIES BAR ---------- */
+  .trust{padding:44px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .trust-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;}
+  .trust-label{font-family:var(--mono);font-size:0.74rem;color:var(--mist-dim);letter-spacing:0.08em;text-transform:uppercase;margin-right:8px;}
+  .industry-chip{
+    font-family:var(--mono);font-size:0.8rem;color:var(--mist);
+    border:1px solid var(--border);border-radius:999px;padding:8px 16px;
+  }
+
+  /* ---------- COMPARISON ---------- */
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .compare-col{border-radius:var(--radius);padding:32px 28px;border:1px solid var(--border);}
+  .compare-col.old{background:var(--surface);}
+  .compare-col.new{background:linear-gradient(160deg,rgba(67,97,238,0.10),rgba(255,176,32,0.05));border-color:var(--border-strong);}
+  .compare-col h3{font-size:1.1rem;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+  .compare-col h3 i{font-size:0.9rem;}
+  .compare-col.old h3{color:var(--mist);}
+  .compare-col.new h3{color:var(--amber);}
+  .compare-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--border);font-size:0.95rem;color:var(--mist);}
+  .compare-item:last-child{border-bottom:none;}
+  .compare-col.old .compare-item i{color:var(--down);}
+  .compare-col.new .compare-item i{color:var(--up);}
+  .compare-col.new .compare-item{color:var(--paper);}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .process{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  .process-step{position:relative;padding:30px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+  .process-num{font-family:var(--mono);font-size:0.78rem;color:var(--amber);letter-spacing:0.08em;margin-bottom:14px;display:block;}
+  .process-step h4{font-size:1.05rem;margin-bottom:8px;}
+  .process-step p{color:var(--mist);font-size:0.88rem;}
+  .process-connector{position:absolute;top:50%;right:-24px;width:24px;height:1px;background:var(--border);display:none;}
+
+  /* ---------- FEATURE CARDS ---------- */
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;}
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px 26px;
+    transition:all .3s ease;
+  }
+  .card:hover{border-color:var(--border-strong);transform:translateY(-6px);box-shadow:0 24px 50px rgba(0,0,0,0.35);}
+  .icon-tile{width:48px;height:48px;margin-bottom:18px;}
+  .card h3{font-size:1.18rem;margin-bottom:10px;}
+  .card p{color:var(--mist);font-size:0.96rem;}
+
+  /* ---------- ROI CALCULATOR ---------- */
+  .calc-wrap{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:44px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;}
+  .calc-field{margin-bottom:26px;}
+  .calc-field label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.8rem;color:var(--mist);margin-bottom:10px;}
+  .calc-field label b{color:var(--paper);}
+  .calc-field input[type="range"]{width:100%;accent-color:var(--blue);}
+  .calc-field input[type="number"]{
+    width:100%;padding:12px 14px;background:var(--void);border:1px solid var(--border);
+    border-radius:10px;color:var(--paper);font-family:var(--mono);font-size:0.95rem;
+  }
+  .calc-output{background:linear-gradient(160deg,rgba(67,97,238,0.14),rgba(255,176,32,0.06));border:1px solid var(--border-strong);border-radius:18px;padding:36px;text-align:center;}
+  .calc-output .co-label{font-family:var(--mono);font-size:0.76rem;color:var(--mist);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
+  .calc-output .co-value{font-family:var(--display);font-size:2.6rem;color:var(--paper);}
+  .calc-output .co-value span{color:var(--amber);}
+  .calc-output .co-note{font-family:var(--mono);font-size:0.72rem;color:var(--mist-dim);margin-top:14px;line-height:1.6;}
+
+  /* ---------- MODELS ---------- */
+  .models-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;}
+  .model-item{
+    background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--blue);
+    border-radius:14px;padding:24px 22px;transition:.25s;
+  }
+  .model-item:hover{border-left-color:var(--amber);background:var(--surface-2);}
+  .model-item .mlabel{font-family:var(--mono);font-size:0.72rem;color:var(--amber);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;display:block;}
+  .model-item h4{font-size:1.08rem;margin-bottom:6px;font-family:var(--display);font-weight:600;}
+  .model-item p{color:var(--mist);font-size:0.92rem;}
+
+  /* ---------- CASE STUDY SPOTLIGHT ---------- */
+  .spotlight{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:0;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;}
+  .spotlight-copy{padding:48px;}
+  .spotlight-copy .eyebrow{margin-bottom:16px;}
+  .spotlight-copy h3{font-size:1.7rem;margin-bottom:16px;}
+  .spotlight-copy p{color:var(--mist);margin-bottom:24px;}
+  .spotlight-quote{border-left:3px solid var(--amber);padding-left:18px;font-style:italic;color:var(--paper);margin-bottom:20px;}
+  .spotlight-stats{background:linear-gradient(160deg,rgba(67,97,238,0.16),rgba(255,176,32,0.08));padding:48px;display:flex;flex-direction:column;justify-content:center;gap:28px;}
+  .spot-stat b{display:block;font-family:var(--display);font-size:2.1rem;color:var(--paper);}
+  .spot-stat span{font-family:var(--mono);font-size:0.76rem;color:var(--mist);letter-spacing:0.04em;text-transform:uppercase;}
+
+  /* ---------- SECURITY ---------- */
+  .security-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;}
+  .sec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;}
+  .sec-card i{color:var(--amber);font-size:1.4rem;margin-bottom:14px;display:block;}
+  .sec-card h3{font-size:1.05rem;margin-bottom:8px;}
+  .sec-card p{color:var(--mist);font-size:0.9rem;}
+  .compliance-note{
+    margin-top:28px;font-family:var(--mono);font-size:0.82rem;color:var(--mist-dim);
+    border:1px dashed var(--border);border-radius:12px;padding:16px 20px;
+  }
+  .compliance-note b{color:var(--amber);font-weight:600;}
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch;}
+  .price-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:34px 28px;display:flex;flex-direction:column;}
+  .price-card.featured{border-color:var(--blue);background:linear-gradient(160deg,rgba(67,97,238,0.12),var(--surface));position:relative;}
+  .price-tag{position:absolute;top:-13px;right:28px;background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.7rem;padding:5px 12px;border-radius:999px;letter-spacing:0.05em;}
+  .price-card h3{font-size:1.1rem;margin-bottom:6px;}
+  .price-card .price{font-family:var(--display);font-size:2.1rem;margin:14px 0;}
+  .price-card .price span{font-family:var(--mono);font-size:0.8rem;color:var(--mist);font-weight:400;}
+  .price-card .pdesc{color:var(--mist);font-size:0.88rem;margin-bottom:24px;}
+  .price-list{flex-grow:1;margin-bottom:26px;}
+  .price-list li{display:flex;gap:10px;padding:8px 0;font-size:0.9rem;color:var(--paper);}
+  .price-list li i{color:var(--up);margin-top:3px;font-size:0.8rem;}
+
+  /* ---------- TEAM ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;}
+  .team-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 22px 26px;text-align:center;}
+  .team-photo{
+    width:96px;height:96px;border-radius:50%;margin:0 auto 16px;overflow:hidden;
+    border:2px solid var(--border-strong);
+  }
+  .team-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .team-card h4{font-size:1.05rem;}
+  .team-card .role{color:var(--amber);font-family:var(--mono);font-size:0.76rem;letter-spacing:0.04em;margin:6px 0 10px;}
+  .team-card p{color:var(--mist);font-size:0.88rem;}
+  .photo-credit{text-align:center;font-family:var(--mono);font-size:0.7rem;color:var(--mist-dim);margin-top:28px;}
+
+  /* ---------- TESTIMONIALS ---------- */
+  .testimonial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+  .t-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;}
+  .t-card .stars{color:var(--amber);margin-bottom:12px;letter-spacing:2px;font-size:0.85rem;}
+  .t-card blockquote{color:var(--paper);font-size:0.98rem;margin-bottom:16px;}
+  .t-card .author{font-weight:600;font-family:var(--display);}
+  .t-card .company{font-family:var(--mono);font-size:0.8rem;color:var(--mist-dim);}
+
+  /* ---------- FAQ ---------- */
+  .faq-list{max-width:820px;margin:0 auto;}
+  .faq-item{border-bottom:1px solid var(--border);}
+  .faq-q{
+    width:100%;background:none;border:none;color:var(--paper);text-align:left;
+    padding:22px 4px;font-family:var(--display);font-size:1.02rem;font-weight:600;
+    display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;
+  }
+  .faq-q i{color:var(--amber);transition:transform .25s ease;flex-shrink:0;}
+  .faq-item.open .faq-q i{transform:rotate(45deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .faq-a p{color:var(--mist);padding:0 4px 22px;font-size:0.95rem;max-width:700px;}
+
+  /* ---------- PRICING CTA ---------- */
+  .cta-band{
+    background:linear-gradient(120deg,rgba(67,97,238,0.18),rgba(255,176,32,0.08));
+    border:1px solid var(--border);border-radius:24px;
+    padding:56px 40px;text-align:center;
+  }
+  .cta-band h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:14px;}
+  .cta-band p{color:var(--mist);margin-bottom:28px;}
+
+  /* ---------- CONTACT ---------- */
+  .contact-wrapper{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start;}
+  .contact-info h3{font-size:1.8rem;margin-bottom:14px;}
+  .contact-info p{color:var(--mist);margin-bottom:26px;}
+  .contact-detail{display:flex;align-items:center;gap:14px;margin-bottom:16px;font-size:0.95rem;color:var(--mist);}
+  .contact-detail i{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--surface);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--amber);
+  }
+  .contact-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:30px;}
+  .contact-form input,.contact-form textarea{
+    width:100%;padding:14px 16px;margin-bottom:14px;
+    background:var(--void);border:1px solid var(--border);border-radius:10px;
+    color:var(--paper);font-family:var(--body);font-size:0.95rem;
+  }
+  .contact-form input::placeholder,.contact-form textarea::placeholder{color:var(--mist-dim);}
+  .contact-form input:focus,.contact-form textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(67,97,238,0.18);}
+  .contact-form textarea{min-height:120px;resize:vertical;}
+  .contact-form button{width:100%;justify-content:center;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#08080a;border-top:1px solid var(--border);padding:56px 0 24px;}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:36px;}
+  .footer-brand p{color:var(--mist);margin-top:12px;max-width:300px;font-size:0.92rem;}
+  .footer-links h4{font-size:0.92rem;margin-bottom:14px;color:var(--paper);}
+  .footer-links ul li{margin-bottom:9px;}
+  .footer-links ul li a{color:var(--mist);font-size:0.9rem;}
+  .footer-links ul li a:hover{color:var(--amber);}
+  .footer-bottom{
+    border-top:1px solid var(--border);padding-top:20px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+    font-family:var(--mono);font-size:0.8rem;color:var(--mist-dim);
+  }
+  .social-icons a{color:var(--mist);margin-left:16px;font-size:1.05rem;}
+  .social-icons a:hover{color:var(--amber);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .compare-grid{grid-template-columns:1fr;}
+    .process{grid-template-columns:1fr 1fr;}
+    .calc-wrap{grid-template-columns:1fr;}
+    .spotlight{grid-template-columns:1fr;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .contact-wrapper{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:700px){
+    .nav-links{position:fixed;top:68px;left:0;right:0;background:var(--void);border-bottom:1px solid var(--border);flex-direction:column;padding:20px 24px;gap:18px;display:none;}
+    .nav-links.active{display:flex;}
+    .hamburger{display:block;}
+    .nav-cta .btn-ghost{display:none;}
+    section{padding:70px 0;}
+    .process{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr;}
+    .footer-bottom{flex-direction:column;text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="container">
+    <nav>
+      <a href="#top" class="brand">
+        <svg class="brand-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="40" fill="#131316"/>
+          <g stroke="#4361EE" stroke-width="10" stroke-linecap="round" fill="none">
+            <line x1="100" y1="34" x2="30" y2="166"/>
+            <line x1="100" y1="34" x2="170" y2="166"/>
+            <line x1="65" y1="100" x2="135" y2="100"/>
+          </g>
+          <circle cx="124" cy="10" r="10" fill="#FFB020"/>
+        </svg>
+        <span class="brand-word">Aether<span class="lg">Logic</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Capabilities</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#contact" class="btn btn-ghost">Request pilot</a>
+        <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content reveal">
+        <span class="eyebrow">Reasoning-native forecasting</span>
+        <h1>See the shape of<br>what happens <span class="grad-text">next.</span></h1>
+        <p>AetherLogic pairs causal reasoning with production-grade forecasting, deployed inside your own cloud environment — so your team acts on signal, not noise, without your data ever leaving your boundary.</p>
+        <div class="btn-row">
+          <a href="#contact" class="btn btn-primary">Request a pilot <i class="fas fa-arrow-right"></i></a>
+          <a href="#how" class="btn btn-ghost">See how it works</a>
+        </div>
+        <div class="hero-proof">
+          <div><b>34%</b><span>Avg. error reduction</span></div>
+          <div><b>2.1M+</b><span>Predictions / month</span></div>
+          <div><b>99.95%</b><span>Uptime</span></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="readout">
+          <div class="readout-bar">
+            <span></span><span></span><span></span>
+            <div class="rlabel">FORECAST.STREAM — LIVE</div>
+          </div>
+          <div class="readout-chart">
+            <svg viewBox="0 0 320 90" width="100%" height="90">
+              <polyline points="0,70 30,64 60,68 90,50 120,55 150,32 180,40 210,20 240,28 270,12 300,18 320,8" fill="none" stroke="#4361EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="240,28 270,12 300,18 320,8" fill="none" stroke="#FFB020" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round"/>
+              <circle cx="320" cy="8" r="4" fill="#FFB020"/>
+            </svg>
+          </div>
+          <div class="readout-body">
+            <div class="rrow">
+              <div class="rname">Demand · Q3 Northeast</div>
+              <div class="rval"><span class="conf">94% conf.</span><span class="up">▲ 12%</span></div>
+            </div>
+            <div class="rrow">
+              <div class="rname">Churn · Enterprise tier</div>
+              <div class="rval"><span class="conf">91% conf.</span><span class="down">▼ 3%</span></div>
+            </div>
+            <div class="rrow">
+              <div class="rname">Anomaly · Payments API</div>
+              <div class="rval"><span class="pulse-dot"></span><span style="color:var(--amber)">flagged 00:42:11</span></div>
+            </div>
+            <div class="rrow">
+              <div class="rname">Inventory · West DCs</div>
+              <div class="rval"><span class="conf">88% conf.</span><span class="up">▲ 6%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRUST / INDUSTRIES ===== -->
+<section class="trust" style="padding-top:0;">
+  <div class="container">
+    <div class="trust-row reveal">
+      <span class="trust-label">Built for</span>
+      <span class="industry-chip">Logistics &amp; supply chain</span>
+      <span class="industry-chip">Financial services</span>
+      <span class="industry-chip">Healthcare &amp; life sciences</span>
+      <span class="industry-chip">Retail &amp; e-commerce</span>
+      <span class="industry-chip">Energy &amp; utilities</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROBLEM / SOLUTION ===== -->
+<section>
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">The gap</span>
+      <h2 class="section-title">Most forecasting tools stop at correlation</h2>
+      <p class="section-sub center">They tell you what's about to happen. They almost never tell you why — which means every forecast is a guess your team has to defend on faith.</p>
+    </div>
+    <div class="compare-grid reveal">
+      <div class="compare-col old">
+        <h3><i class="fas fa-xmark"></i> The old way</h3>
+        <div class="compare-item"><i class="fas fa-xmark"></i>Black-box scores with no rationale</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i>Retrained quarterly, stale in between</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i>Data exported to a third-party cloud</div>
+        <div class="compare-item"><i class="fas fa-xmark"></i>Anomalies discovered after the fact</div>
+      </div>
+      <div class="compare-col new">
+        <h3><i class="fas fa-check"></i> The AetherLogic way</h3>
+        <div class="compare-item"><i class="fas fa-check"></i>Every prediction ships with plain-language reasoning</div>
+        <div class="compare-item"><i class="fas fa-check"></i>Continuous retraining as new data lands</div>
+        <div class="compare-item"><i class="fas fa-check"></i>Runs inside your own environment, always</div>
+        <div class="compare-item"><i class="fas fa-check"></i>Anomalies flagged in real time, before impact</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="how" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Process</span>
+      <h2 class="section-title">From raw data to a decision you can act on</h2>
+      <p class="section-sub center">Four stages, running continuously — not a one-time model handoff.</p>
+    </div>
+    <div class="process reveal">
+      <div class="process-step">
+        <span class="process-num">01 · CONNECT</span>
+        <h4>Point us at your data</h4>
+        <p>Warehouse, event stream, or data lake — connected read-only, on your terms.</p>
+      </div>
+      <div class="process-step">
+        <span class="process-num">02 · REASON</span>
+        <h4>Trace the causes</h4>
+        <p>Causal models separate what's actually driving a metric from what's just correlated.</p>
+      </div>
+      <div class="process-step">
+        <span class="process-num">03 · FORECAST</span>
+        <h4>Generate the prediction</h4>
+        <p>Ensemble models produce a forward-looking number with a confidence band, not a guess.</p>
+      </div>
+      <div class="process-step">
+        <span class="process-num">04 · ACT</span>
+        <h4>Ship it to your team</h4>
+        <p>Alerts, dashboards, or a direct API call — wherever the decision actually gets made.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Why AetherLogic</span>
+      <h2 class="section-title">Built for teams that have to<br>justify every prediction</h2>
+      <p class="section-sub center">Precision and transparency aren't a tradeoff here — every forecast comes with the reasoning behind it.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="card">
+        <svg class="icon-tile" viewBox="0 0 48 48"><g stroke="#4361EE" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M8 34 L20 14 L28 24 L40 8"/></g><circle cx="8" cy="34" r="3" fill="#FFB020"/><circle cx="40" cy="8" r="3" fill="#4361EE"/></svg>
+        <h3>Causal reasoning engine</h3>
+        <p>Multi-step inference that traces cause, not just correlation, so every forecast comes with a "why" your stakeholders can act on.</p>
+      </div>
+      <div class="card">
+        <svg class="icon-tile" viewBox="0 0 48 48"><g stroke="#4361EE" stroke-width="2.4" fill="none"><rect x="8" y="24" width="6" height="16" rx="1"/><rect x="21" y="14" width="6" height="26" rx="1"/><rect x="34" y="20" width="6" height="20" rx="1"/></g></svg>
+        <h3>Forecasting at scale</h3>
+        <p>Time-series, anomaly detection, and scenario simulation running continuously across millions of series in parallel.</p>
+      </div>
+      <div class="card">
+        <svg class="icon-tile" viewBox="0 0 48 48"><circle cx="24" cy="24" r="15" stroke="#4361EE" stroke-width="2.4" fill="none"/><path d="M17 24l5 5 9-11" stroke="#FFB020" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Explainable by default</h3>
+        <p>Every prediction ships with a confidence interval and a plain-language rationale — nothing is a black box.</p>
+      </div>
+      <div class="card">
+        <svg class="icon-tile" viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="28" rx="6" stroke="#4361EE" stroke-width="2.4" fill="none"/><path d="M18 24h12M24 18v12" stroke="#FFB020" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <h3>Private, isolated deployment</h3>
+        <p>Runs inside your own cloud environment, in your own isolated network, so customer data never leaves your account boundary.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ROI CALCULATOR ===== -->
+<section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Estimate your impact</span>
+      <h2 class="section-title">What could better forecasts be worth?</h2>
+      <p class="section-sub center">A rough estimate based on the average error reduction teams see in their first quarter.</p>
+    </div>
+    <div class="calc-wrap reveal">
+      <div>
+        <div class="calc-field">
+          <label>Forecasted decisions per month <b id="decVal">5,000</b></label>
+          <input type="range" id="decisions" min="500" max="50000" step="500" value="5000">
+        </div>
+        <div class="calc-field">
+          <label>Average cost of a missed forecast ($) <b id="costVal">$40</b></label>
+          <input type="range" id="cost" min="5" max="500" step="5" value="40">
+        </div>
+        <div class="calc-field">
+          <label>Share of forecasts that currently miss <b id="missVal">15%</b></label>
+          <input type="range" id="missrate" min="2" max="40" step="1" value="15">
+        </div>
+      </div>
+      <div class="calc-output">
+        <div class="co-label">Estimated monthly savings</div>
+        <div class="co-value">$<span id="savingsOut">10,200</span></div>
+        <div class="co-note">Estimate = decisions × avg. cost × current miss rate × 34% typical error reduction. For directional planning only — request a pilot for numbers specific to your data.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODELS ===== -->
+<section id="models">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Model library</span>
+      <h2 class="section-title">Predictive models, tuned for the real world</h2>
+      <p class="section-sub center">Specialized architectures fine-tuned for forecasting and decision support, not generic benchmarks.</p>
+    </div>
+    <div class="models-grid reveal">
+      <div class="model-item"><span class="mlabel">Forecasting</span><h4>Temporal Fusion</h4><p>Multi-horizon forecasting with attention over exogenous variables.</p></div>
+      <div class="model-item"><span class="mlabel">Causal</span><h4>Causal Impact</h4><p>Measures the effect of interventions with Bayesian structural time-series.</p></div>
+      <div class="model-item"><span class="mlabel">Reasoning</span><h4>Neural Reasoner</h4><p>Graph-based reasoning for complex relational predictions.</p></div>
+      <div class="model-item"><span class="mlabel">Monitoring</span><h4>Anomaly Oracle</h4><p>Real-time detection of outliers and regime changes in streaming data.</p></div>
+      <div class="model-item"><span class="mlabel">Ensemble</span><h4>Ensemble Stack</h4><p>Blend of tree-based, deep, and probabilistic models for robust output.</p></div>
+      <div class="model-item"><span class="mlabel">Spatial</span><h4>Geospatial Predictor</h4><p>Location-aware forecasting for logistics, retail, and climate.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CASE STUDY SPOTLIGHT ===== -->
+<section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="spotlight reveal">
+      <div class="spotlight-copy">
+        <span class="eyebrow">Case study</span>
+        <h3>How LogiChain cut forecast error by a third in one quarter</h3>
+        <p>LogiChain's demand planning team was reforecasting weekly with a black-box model nobody fully trusted. AetherLogic replaced it with a causal model that explains every shift in demand — and retrains continuously instead of quarterly.</p>
+        <div class="spotlight-quote">"We can now justify every prediction to stakeholders. That's the part that actually changed how we work."</div>
+        <div style="font-family:var(--mono);font-size:0.85rem;color:var(--mist);">Priya Sharma — VP Data, LogiChain</div>
+      </div>
+      <div class="spotlight-stats">
+        <div class="spot-stat"><b>34%</b><span>Forecast error reduction</span></div>
+        <div class="spot-stat"><b>6 weeks</b><span>From pilot to production</span></div>
+        <div class="spot-stat"><b>94%</b><span>Avg. prediction confidence</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECURITY ===== -->
+<section id="security">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Trust</span>
+      <h2 class="section-title">A security posture built for enterprise procurement</h2>
+      <p class="section-sub center">Designed so your security team's questionnaire is a formality, not a blocker.</p>
+    </div>
+    <div class="security-grid reveal">
+      <div class="sec-card"><i class="fas fa-lock"></i><h3>Encryption everywhere</h3><p>AES-256 at rest and TLS 1.3 in transit across every service boundary.</p></div>
+      <div class="sec-card"><i class="fas fa-shield-halved"></i><h3>Isolated by design</h3><p>A dedicated, isolated network per customer, with least-privilege access scoped to a single tenant.</p></div>
+      <div class="sec-card"><i class="fas fa-file-shield"></i><h3>Full audit trail</h3><p>Every inference is logged into an immutable, versioned archive you can hand to an auditor.</p></div>
+      <div class="sec-card"><i class="fas fa-user-check"></i><h3>Data residency control</h3><p>Data and models stay inside your own account and chosen region — never copied out.</p></div>
+    </div>
+    <div class="compliance-note reveal">
+      <b>Compliance roadmap:</b> SOC 2 Type II audit in progress · GDPR-ready data handling · HIPAA-eligible architecture available on request.
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="section-title">Straightforward plans, no seat-counting</h2>
+      <p class="section-sub center">Priced on forecast volume, not headcount. All plans start with a paid pilot.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <h3>Starter</h3>
+        <div class="price">$2,400 <span>/ month</span></div>
+        <p class="pdesc">For a single team validating one forecasting use case.</p>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i>Up to 10,000 forecasts / month</li>
+          <li><i class="fas fa-check"></i>2 predictive models</li>
+          <li><i class="fas fa-check"></i>Email support</li>
+          <li><i class="fas fa-check"></i>Standard security posture</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost" style="justify-content:center;">Request a pilot</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-tag">Most common</span>
+        <h3>Growth</h3>
+        <div class="price">$7,800 <span>/ month</span></div>
+        <p class="pdesc">For teams running forecasting across several business units.</p>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i>Up to 150,000 forecasts / month</li>
+          <li><i class="fas fa-check"></i>Full model library</li>
+          <li><i class="fas fa-check"></i>Dedicated Slack channel</li>
+          <li><i class="fas fa-check"></i>Isolated deployment</li>
+          <li><i class="fas fa-check"></i>Quarterly model reviews</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary" style="justify-content:center;">Request a pilot</a>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <p class="pdesc">For regulated, multi-region, or high-volume deployments.</p>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i>Unlimited forecast volume</li>
+          <li><i class="fas fa-check"></i>Custom model development</li>
+          <li><i class="fas fa-check"></i>Dedicated solutions engineer</li>
+          <li><i class="fas fa-check"></i>Custom compliance review</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost" style="justify-content:center;">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TEAM ===== -->
+<section id="team">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">The team</span>
+      <h2 class="section-title">Researchers and engineers who ship</h2>
+      <p class="section-sub center">A small team obsessed with trustworthy, explainable AI in production.</p>
+    </div>
+    <div class="team-grid reveal">
+      <div class="team-card">
+        <div class="team-photo"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop&crop=faces&q=80" alt="Portrait of Dr. Elena Voss"></div>
+        <h4>Dr. Elena Voss</h4><div class="role">CHIEF AI SCIENTIST</div><p>Ex-DeepMind, PhD in probabilistic machine learning.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-photo"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=faces&q=80" alt="Portrait of Marcus Chen"></div>
+        <h4>Marcus Chen</h4><div class="role">HEAD OF ENGINEERING</div><p>Distributed systems &amp; MLOps, previously at Stripe.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=faces&q=80" alt="Portrait of Dr. Sarah Kwon"></div>
+        <h4>Dr. Sarah Kwon</h4><div class="role">RESEARCH LEAD</div><p>Causal inference &amp; time-series, PhD from MIT.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-photo"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces&q=80" alt="Portrait of James Okafor"></div>
+        <h4>James Okafor</h4><div class="role">PRODUCT &amp; STRATEGY</div><p>AI product leader with three prior exits.</p>
+      </div>
+    </div>
+    <div class="photo-credit">Team photography via Unsplash — placeholder portraits, not yet AetherLogic's actual team. Swap in real photos before publishing.</div>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Feedback</span>
+      <h2 class="section-title">What early teams say</h2>
+      <p class="section-sub center">Real feedback from teams running AetherLogic in production.</p>
+    </div>
+    <div class="testimonial-grid reveal">
+      <div class="t-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>The explainability features changed how we work with regulators. We can now justify every prediction, not just the outcome.</blockquote>
+        <div class="author">David Kim</div>
+        <div class="company">CTO, FinCore Analytics</div>
+      </div>
+      <div class="t-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>Deployment inside our own environment was painless, and the ensemble model outperformed our previous system on precision.</blockquote>
+        <div class="author">Dr. Amira Nasser</div>
+        <div class="company">Director of AI, HealthPredict</div>
+      </div>
+      <div class="t-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>The pilot paid for itself in the first month. Rolling it out to two more business units next quarter.</blockquote>
+        <div class="author">Tomas Reyes</div>
+        <div class="company">Head of Ops, BrightGrid Energy</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section id="faq">
+  <div class="container">
+    <div class="center reveal" style="max-width:700px;">
+      <span class="eyebrow">Questions</span>
+      <h2 class="section-title">Frequently asked</h2>
+      <p class="section-sub center">The questions security and data teams usually ask first.</p>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q">How is this different from a generic forecasting model?<i class="fas fa-plus"></i></button>
+        <div class="faq-a"><p>Most forecasting tools stop at a number. AetherLogic's causal layer traces what's actually driving that number, so your team gets a rationale it can act on and defend, not just a score.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Where does our data live?<i class="fas fa-plus"></i></button>
+        <div class="faq-a"><p>Inside your own cloud environment, in an isolated network scoped to your account. Nothing is copied to a shared or third-party environment.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How long does a pilot take?<i class="fas fa-plus"></i></button>
+        <div class="faq-a"><p>Six weeks on average, from data connection to a measurable lift on one forecasting problem you choose.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Do you support on-prem or hybrid deployment?<i class="fas fa-plus"></i></button>
+        <div class="faq-a"><p>Yes — most customers run fully isolated cloud deployments, and hybrid or on-prem is available for regulated environments. Ask us about your specific constraints.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What happens after the pilot?<i class="fas fa-plus"></i></button>
+        <div class="faq-a"><p>You'll have a measured error-reduction number specific to your data. From there it's a standard subscription — no re-implementation required.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA BAND ===== -->
+<section>
+  <div class="container">
+    <div class="cta-band reveal">
+      <span class="eyebrow" style="justify-content:center;">Get started</span>
+      <h2>Start with a six-week pilot</h2>
+      <p>Bring one forecasting problem. We'll deploy inside your own environment and show measurable lift before you commit to anything.</p>
+      <a href="#contact" class="btn btn-primary">Request a pilot <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-wrapper reveal">
+      <div class="contact-info">
+        <span class="eyebrow">Get in touch</span>
+        <h3>Let's build something <span class="grad-text">intelligent</span></h3>
+        <p>Reach out for a demo, a pilot, or just to talk through your forecasting problem.</p>
+        <div class="contact-detail"><i class="fas fa-envelope"></i><span>hello@aetherlogic.ai</span></div>
+        <div class="contact-detail"><i class="fas fa-phone-alt"></i><span>+1 (800) 555-AETH</span></div>
+        <div class="contact-detail"><i class="fas fa-map-marker-alt"></i><span>460 Bryant St, San Francisco, CA 94107</span></div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <input type="text" placeholder="Full name" required />
+        <input type="email" placeholder="Email address" required />
+        <input type="text" placeholder="Company" />
+        <textarea placeholder="Tell us about your forecasting problem..."></textarea>
+        <button type="submit" class="btn btn-primary">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="brand-word">Aether<span class="lg" style="color:var(--blue-soft);">Logic</span></span>
+        <p>Causal reasoning and predictive AI for the next generation of decision intelligence.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Capabilities</a></li>
+          <li><a href="#models">Models</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="brand-kit.html">Brand kit</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#team">Team</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#security">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 AetherLogic, Inc. All rights reserved.</span>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#"><i class="fab fa-github"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+  hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => navLinks.classList.remove('active'));
+  });
+
+  // Contact form (demo)
+  const form = document.getElementById('contactForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Thank you for reaching out! A member of our team will get back to you shortly.');
+    form.reset();
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+
+  // ROI calculator
+  const decisions = document.getElementById('decisions');
+  const cost = document.getElementById('cost');
+  const missrate = document.getElementById('missrate');
+  const decVal = document.getElementById('decVal');
+  const costVal = document.getElementById('costVal');
+  const missVal = document.getElementById('missVal');
+  const savingsOut = document.getElementById('savingsOut');
+
+  function formatNum(n){ return Math.round(n).toLocaleString('en-US'); }
+
+  function updateCalc(){
+    const d = parseFloat(decisions.value);
+    const c = parseFloat(cost.value);
+    const m = parseFloat(missrate.value) / 100;
+    decVal.textContent = formatNum(d);
+    costVal.textContent = '$' + formatNum(c);
+    missVal.textContent = missrate.value + '%';
+    const savings = d * c * m * 0.34;
+    savingsOut.textContent = formatNum(savings);
+  }
+  [decisions, cost, missrate].forEach(el => el.addEventListener('input', updateCalc));
+  updateCalc();
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(openItem => {
+        openItem.classList.remove('open');
+        openItem.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+</body>
+</html>
